@@ -1,0 +1,198 @@
+{% extends "staff_home.html" %}
+
+{% block section %}
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="input-group mb-3">
+          <div class="input-group-text p-0">
+            <select id="searchSelect" class="form-select form-select-lg shadow-none bg-light border-0">
+              <option value="name">Name</option>
+              <option value="email">Email</option>
+              <option value="defaulter_id">Defaulter ID</option>                
+            </select>
+          </div>
+          <input id="searchInput" type="text" class="form-control" placeholder="Enter defaulter name...">
+          <button id="searchButton" class="input-group-text shadow-none px-4 btn-success">
+            <i class="bi bi-search me-2"></i> Search
+          </button>
+      </div>
+  </div> 
+</div>
+
+<div id="noResultsAlert" class="alert alert-warning" style="display: none;">
+    No results found.
+</div>
+
+<div id="searchResults" class="mt-4"></div>
+
+<script>
+  // Get CSRF token
+  var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  document.getElementById("searchSelect").addEventListener("change", function() {
+      var selectedOption = this.value;
+      var placeholderText = "";
+      switch(selectedOption) {
+          case "name":
+              placeholderText = "Enter defaulter's name...";
+              break;
+          case "email":
+              placeholderText = "Enter defaulter's email...";
+              break;
+          case "defaulter_id":
+              placeholderText = "Enter defaulter's id...";
+              break;
+          default:
+              placeholderText = "Enter search keyword...";
+      }
+      document.getElementById("searchInput").placeholder = placeholderText;
+  });
+
+  document.getElementById("searchButton").addEventListener("click", function() {
+      var searchQuery = document.getElementById("searchInput").value;
+      var searchField = document.getElementById("searchSelect").value;      
+
+      // Make an AJAX request to the search endpoint
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/search_for_defaulter/", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);  // Set CSRF token
+
+      xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+              var response = JSON.parse(xhr.responseText);
+              displaySearchResults(response.results);
+          }
+      };
+
+      var data = JSON.stringify({q: searchQuery, field: searchField});
+      xhr.send(data);
+  });
+
+  function displaySearchResults(results) {
+    var searchResultsDiv = document.getElementById("searchResults");
+    searchResultsDiv.innerHTML = ''; // Clear previous results
+
+    if (results.length === 0) {
+        document.getElementById("noResultsAlert").style.display = "block";
+        return;
+    }
+
+    document.getElementById("noResultsAlert").style.display = "none";
+
+    results.forEach(function(defaulter) {
+        var defaulterDiv = document.createElement("div");
+        var defaulterId = defaulter.id; // Get the defaulter's ID
+        defaulterDiv.id = "defaulterDiv_" + defaulterId; // Set the id attribute using the defaulter's ID
+        defaulterDiv.classList.add("row", "align-items-center", "mb-3"); // Use Bootstrap row class with margin-bottom and align-items-center for vertical alignment
+
+        var namePara = document.createElement("p");        
+        namePara.textContent = "Name: " + defaulter.name;
+        namePara.classList.add("col"); // Use Bootstrap column class
+
+        var emailPara = document.createElement("p");
+        emailPara.textContent = "email: " + defaulter.email;
+        emailPara.classList.add("col"); // Use Bootstrap column class
+
+        var defaulter_idPara = document.createElement("p");
+        defaulter_idPara.textContent = "ID: " + defaulter.defaulter_id;
+        defaulter_idPara.classList.add("col"); // Use Bootstrap column class
+
+        var locationPara = document.createElement("p");
+        locationPara.textContent = "Location: " + defaulter.location;
+        locationPara.classList.add("col"); // Use Bootstrap column class
+
+        var phonePara = document.createElement("p");
+        phonePara.textContent = "Phone: " + defaulter.phone;
+        phonePara.classList.add("col"); // Use Bootstrap column class
+
+        var debtPara = document.createElement("p");
+        debtPara.textContent = "Outstanding debt: " + defaulter.outstanding_debt;
+        debtPara.classList.add("col"); // Use Bootstrap column class
+
+        var buttonsDiv = document.createElement("div");
+        buttonsDiv.classList.add("col", "d-flex", "justify-content-end"); // Use Bootstrap column class and flexbox utilities
+
+        var editButton = document.createElement("button");
+        editButton.textContent = "Edit";
+        editButton.classList.add("btn", "btn-primary", "me-2"); // Use Bootstrap button classes
+        editButton.addEventListener("click", function() {
+            // Call the function to handle editing
+            editDefaulters(defaulter);
+        });
+
+        var deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.classList.add("btn", "btn-danger"); // Use Bootstrap button classes
+        deleteButton.addEventListener("click", function() {
+            // Call the function to handle deleting
+            deleteDefaulters(defaulter.id, defaulterDiv, searchResultsDiv); // Pass searchResultsDiv as an argument
+        });
+
+        var hr = document.createElement("hr"); // Create a horizontal line element
+
+        // Append buttons to buttonsDiv
+        buttonsDiv.appendChild(editButton);
+        buttonsDiv.appendChild(deleteButton);
+
+        // Append elements to defaulterDiv
+        defaulterDiv.appendChild(namePara);
+        defaulterDiv.appendChild(emailPara);
+        defaulterDiv.appendChild(defaulter_idPara);
+        defaulterDiv.appendChild(locationPara);
+        defaulterDiv.appendChild(phonePara);
+        defaulterDiv.appendChild(debtPara);
+        defaulterDiv.appendChild(buttonsDiv);
+
+        // Append the horizontal line after defaulterDiv
+        searchResultsDiv.appendChild(defaulterDiv);
+        searchResultsDiv.appendChild(hr);
+    });
+}
+
+// Function to handle editing of a defaulter
+function editDefaulters(defaulter) {
+  // Redirect to the edit URL with the defaulter ID
+  window.location.href = "/edit_defaulter/" + defaulter.id + "/";
+}
+
+// Function to handle deletion of a defaulter
+function deleteDefaulters(defaulterId, defaulterDiv, searchResultsDiv) { // Add searchResultsDiv as a parameter
+  // Send an AJAX request to delete the defaulter
+  fetch(`/delete_defaulter/${defaulterId}/`, {
+      method: 'DELETE',
+      headers: {
+          'X-CSRFToken': csrftoken,
+      }
+  })
+  .then(response => {
+      if (response.ok) {            
+          // Defaulters deletion was successful
+          // Replace the deleted row with a success notification
+          var notification = document.createElement("div");
+          notification.classList.add("alert", "alert-success");
+          notification.textContent = "Defaulters successfully deleted.";
+          searchResultsDiv.replaceChild(notification, defaulterDiv); // Use searchResultsDiv here
+
+          // Automatically remove the notification after 3 seconds
+          setTimeout(function() {
+              searchResultsDiv.removeChild(notification);
+          }, 3000);
+      } else {
+          // Handle error response from the server
+          console.error('Defaulters deletion failed:', response.statusText);
+      }
+  })
+  .catch(error => {
+      console.error('Error:', error);
+  });
+}
+</script>
+
+{% block extra_content %}
+
+{% endblock %}
+
+{% endblock %}

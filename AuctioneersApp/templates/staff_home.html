@@ -1,0 +1,68 @@
+{% extends "partials/base.html" %}
+
+{% block nav %}
+    <!-- The logout form can remain as it is -->
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="btn btn-danger ml-auto" style="margin-right: 10px;" type="submit">Logout</button>
+    </form>
+{% endblock %}
+
+{% block content %}
+
+<div class="offcanvas offcanvas-start w-25" tabindex="-1" id="offcanvas" data-bs-keyboard="false" data-bs-backdrop="false">
+    <div class="offcanvas-header">
+        <h6 class="offcanvas-title d-none d-sm-block fw-bold text-uppercase text-center text-dark">Menu</h6>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body px-0">
+        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-start" id="menu">
+            <li class="nav-item">
+                <a href="{% url 'staff_home' %}" class="nav-link text-truncate">
+                    <i class="fs-5 bi-house"></i><span class="ms-1 d-none d-sm-inline">Home</span>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="nav-link dropdown-toggle  text-truncate" id="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fs-5 bi-person"></i><span class="ms-1 d-none d-sm-inline">Defaulters</span>
+                </a>
+                <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdown">
+                    <li><a class="dropdown-item" href="{% url 'newdefaulter' %}">New</a></li>
+                    <li><a class="dropdown-item" href="{% url 'searchdefaulter' %}">Search</a></li>                    
+                </ul>
+            </li>            
+            <li class="dropdown">
+                <a href="#" class="nav-link dropdown-toggle  text-truncate" id="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fs-5 bi-envelope"></i><span class="ms-1 d-none d-sm-inline">Emails</span>
+                </a>
+                <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdown">
+                    <li><a class="dropdown-item" href="{% url 'send_reminder_emails' %}">Email defaulters</a></li>                                         
+                </ul>
+            </li>            
+            <li class="dropdown">
+                <a href="#" class="nav-link dropdown-toggle text-truncate" id="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fs-5 fas fa-exchange-alt"></i><span class="ms-1 d-none d-sm-inline">Transactions</span>
+                </a>
+                <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdown">
+                    <li><a class="dropdown-item" href="#">New</a></li>
+                    <li><a class="dropdown-item" href="#">Search</a></li>                    
+                </ul>
+            </li>                       
+        </ul>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col min-vh-100 py-3">
+            <!-- toggler -->
+            <button class="btn float-end" data-bs-toggle="offcanvas" data-bs-target="#offcanvas" role="button">
+                <i class="bi bi-arrow-right-square-fill fs-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvas"></i>
+            </button> 
+            {% block section %}  
+            
+            {% endblock %}            
+        </div>
+    </div>
+</div> 
+
+{% endblock %} 

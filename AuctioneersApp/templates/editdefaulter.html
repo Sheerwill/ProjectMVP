@@ -1,0 +1,60 @@
+{% extends "staff_home.html" %}
+
+{% block section %}
+<body class="text-center">
+    <div class="container">               
+        <div id="registration-form" class="form-signin">
+            <h1 class="display-4 text-primary mb-4">Edit Defaulter</h1>
+            <form id="edit-defaulter-form" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-lg btn-primary" type="submit">Submit</button>
+            </form>
+        </div>
+
+        <div id="success-message" class="alert alert-success" role="alert" style="display: none; margin-top: 10px;">
+            Congratulations! You have successfully edited the defaulter.
+        </div>            
+    </div>
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var form = document.getElementById("edit-defaulter-form");
+        var registrationForm = document.getElementById("registration-form");
+        var successMessage = document.getElementById("success-message");                    
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            
+            // Get the defaulter ID from the URL
+            var defaulterId = window.location.pathname.split('/').filter(segment => segment !== '').pop();
+            console.log("Book ID:", defaulterId); // Add this line for debugging
+
+            // Send an AJAX request to the server to edit the defaulter
+            fetch('http://127.0.0.1:8000/edit_defaulter/' + defaulterId + '/', {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Form submission was successful
+                    form.reset();  // Reset the form fields
+                    registrationForm.style.display = "none"; // Hide the form
+                    successMessage.style.display = "block"; // Display the success message                       
+                } else {
+                    // Handle error response from the server
+                    console.error('Form submission failed:', response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });      
+    });
+</script>
+
+{% endblock %}
