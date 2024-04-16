@@ -132,3 +132,6 @@ def send_reminder_emails(request):
         print("Email sent successfully\n")
 
     return render(request, 'emails_sent.html')  # Render a template indicating emails were sent
+
+def chatbot(request):
+    return render(request, 'chat.html')

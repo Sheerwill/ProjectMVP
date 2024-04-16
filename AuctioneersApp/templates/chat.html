@@ -1,0 +1,70 @@
+{% extends "partials/base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <!-- Your existing content goes here -->
+</div>
+
+<!-- Chat input -->
+<div class="container" style="margin-top: 20px;"> <!-- Add margin-top here -->
+  <div class="row justify-content-center">
+    <div class="col-md-6"> <!-- Adjusted column width class -->
+      <div class="chat-container">
+        <ul class="chat-messages" id="chat-messages">
+          <!-- Chat messages will be added dynamically here -->
+        </ul>
+        <div class="message-input">
+          <input type="text" id="input-message" class="input-message form-control" placeholder="Type a message...">
+          <button id="send-button" class="send-button btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sendButton = document.getElementById('send-button');
+    const inputMessage = document.getElementById('input-message');
+    const chatMessages = document.getElementById('chat-messages');
+
+    sendButton.addEventListener('click', function () {
+      const messageText = inputMessage.value.trim();
+      if (messageText !== '') {
+        // Create a new chat message element
+        const messageElement = document.createElement('li');
+        messageElement.textContent = messageText;
+        messageElement.classList.add('sent-message');
+
+        // Append the new chat message to the chat messages container
+        chatMessages.appendChild(messageElement);
+
+        // Clear the input field
+        inputMessage.value = '';
+
+        // Scroll to the bottom of the chat messages
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    });
+  });
+</script>
+
+<style>
+  .sent-message {
+    background-color: #f1f0f0;
+    color: #333;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    max-width: 80%;
+  }
+
+  .chat-messages {
+    list-style-type: none; /* Remove bullets from list items */
+    padding: 0;
+    margin: 0;
+  }
+</style>
+
+{% endblock %}
