@@ -14,6 +14,6 @@ urlpatterns = [
     path('search_for_defaulter/', search_for_defaulter, name='search_for_defaulter'),
     path('edit_defaulter/<int:defaulter_id>/', edit_defaulter, name='edit_defaulter'),
     path('delete_defaulter/<int:defaulter_id>/', delete_defaulter, name='delete_defaulter'),
-    path('email_defaulters/', send_reminder_emails, name='send_reminder_emails'),
-    path('chatbot/', chatbot, name='chatbot')
+    path('email_defaulters/', send_reminder_emails, name='send_reminder_emails'),    
+    path('chatbot/', chatbot, name='chatbot'),
 ]

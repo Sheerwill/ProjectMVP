@@ -50,7 +50,8 @@ class CustomPasswordResetView(PasswordResetView):
                 self.get_context_data(form=form, unregistered_email=True)
             )
         return super().form_valid(form)
-    
+
+@login_required
 def newdefaulter(request):
     if request.method == 'POST':
         form = DefaultersForm(request.POST)
@@ -65,9 +66,11 @@ def newdefaulter(request):
 
     return render(request, 'newdefaulter.html', {'form': form})
 
+@login_required
 def search_defaulter(request):
     return render(request, 'searchdefaulter.html')
 
+@login_required
 def search_for_defaulter(request):
     if request.method == 'POST':
         # Get the data from the request body
@@ -95,7 +98,8 @@ def search_for_defaulter(request):
         return JsonResponse({'results': serialized_results})
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
-    
+
+@login_required
 def edit_defaulter(request, defaulter_id):
     defaulter = get_object_or_404(Defaulters, pk=defaulter_id)
     
@@ -109,6 +113,7 @@ def edit_defaulter(request, defaulter_id):
     
     return render(request, 'editdefaulter.html', {'form': form})
 
+@login_required
 def delete_defaulter(request, defaulter_id):
     # Get the book object
     defaulter = get_object_or_404(Defaulters, pk=defaulter_id)
@@ -119,11 +124,12 @@ def delete_defaulter(request, defaulter_id):
     # Return a success response
     return JsonResponse({'success': True})
 
+@login_required
 def send_reminder_emails(request):
     defaulters = Defaulters.objects.filter(outstanding_debt__gt=0)  # Filter defaulters with outstanding debt
     for defaulter in defaulters:
         subject = f"Reminder: Outstanding Debt"
-        message = f"Hello {defaulter.name},\n\nThis is a reminder that you have an outstanding debt of ${defaulter.outstanding_debt}.\n\nPlease make the payment at your earliest convenience.\n\nBest regards,\nKeysian Auctioneers"
+        message = f"Hello {defaulter.name},\n\nThis is a reminder that you have an outstanding debt of Ksh.{defaulter.outstanding_debt}.\n\nPlease make the payment at your earliest convenience.\n\nBest regards,\nKeysian Auctioneers"
 
         # Instead of sending actual emails, output to the console
         print("Sending email to:", defaulter.email)
@@ -133,5 +139,6 @@ def send_reminder_emails(request):
 
     return render(request, 'emails_sent.html')  # Render a template indicating emails were sent
 
+@login_required
 def chatbot(request):
     return render(request, 'chat.html')
