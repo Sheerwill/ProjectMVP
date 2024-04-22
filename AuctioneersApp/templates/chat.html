@@ -23,6 +23,9 @@
   </div>
 </div>
 
+<!-- Add CSRF token -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const sendButton = document.getElementById('send-button');
@@ -45,8 +48,56 @@
 
         // Scroll to the bottom of the chat messages
         chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Send the message to the Django view
+        sendMessageToDjango(messageText);
       }
     });
+
+    function sendMessageToDjango(message) {
+      // Send the message using AJAX
+      console.log(message);
+      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      console.log("Token", csrfToken);
+      const url = '{% url "chat_with_assistant" %}';
+      const data = {
+        message: message,
+        csrfmiddlewaretoken: csrfToken
+      };
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the response from the Django view
+        console.log(data);        
+        if (data.openai.status === 'success') {          
+          renderReceivedMessage(data.openai.generated_text); // Render the received message
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    function renderReceivedMessage(message) {
+      // Create a new chat message element for the received message
+      const messageElement = document.createElement('li');
+      messageElement.textContent = message;
+      messageElement.classList.add('received-message');
+
+      // Append the new chat message to the chat messages container
+      chatMessages.appendChild(messageElement);
+
+      // Scroll to the bottom of the chat messages
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
   });
 </script>
 
@@ -54,6 +105,15 @@
   .sent-message {
     background-color: #f1f0f0;
     color: #333;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    max-width: 80%;
+  }
+
+  .received-message {
+    background-color: #e0eaf5; /* Blue background color */
+    color: #333; /* Text color */
     border-radius: 10px;
     padding: 10px;
     margin-bottom: 10px;

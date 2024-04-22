@@ -1,7 +1,7 @@
 from django.urls import path, include
 from .views import (CustomLoginView, staff_home_view, signup, CustomPasswordResetView,
                     newdefaulter, search_defaulter, search_for_defaulter, edit_defaulter,
-                    delete_defaulter, send_reminder_emails, chatbot)
+                    delete_defaulter, send_reminder_emails, chatbot, chat_with_assistant)
 
 urlpatterns = [
     path('', CustomLoginView.as_view(), name='login'),
@@ -16,4 +16,5 @@ urlpatterns = [
     path('delete_defaulter/<int:defaulter_id>/', delete_defaulter, name='delete_defaulter'),
     path('email_defaulters/', send_reminder_emails, name='send_reminder_emails'),    
     path('chatbot/', chatbot, name='chatbot'),
+    path('chat/', chat_with_assistant, name='chat_with_assistant'),
 ]

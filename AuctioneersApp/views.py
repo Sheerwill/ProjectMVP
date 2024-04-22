@@ -6,7 +6,7 @@ from django.contrib.auth import login, authenticate
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-import json
+import json, requests
 from .models import Defaulters
 
 # Create your views here.
@@ -142,3 +142,37 @@ def send_reminder_emails(request):
 @login_required
 def chatbot(request):
     return render(request, 'chat.html')
+
+def chat_with_assistant(request):    
+    if request.method == 'POST': 
+        json_data = json.loads(request.body)
+        message = json_data.get('message')        
+
+        # Your API key
+        api_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmIxNTE0M2UtNGI4ZS00NmZmLTg0MmQtNTBlMzBiZDNjODc4IiwidHlwZSI6ImFwaV90b2tlbiJ9.R-3Y3-KnDIOXPoXLbhm0jJkWj4OKHzkQTWs7GD_Z2q4"
+        
+        headers = {"Authorization": f"Bearer {api_key}"}
+        url = "https://api.edenai.run/v2/text/chat"
+
+        payload = {
+            "providers": "openai",
+            "text": message,
+            "chat_global_action": "Act as an assistant",
+            "previous_history" : [],
+            "temperature": 0.0,
+            "max_tokens" : 150
+        }
+
+        # Making the API call
+        response = requests.post(url, json=payload, headers=headers)
+        
+        if response.status_code == 200:
+            # Parsing the response
+            result = response.json()
+            return JsonResponse(result)
+        else:
+            # Handle error response
+            error_message = {"error": "API request failed", "status_code": response.status_code}
+            return JsonResponse(error_message, status=response.status_code)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
